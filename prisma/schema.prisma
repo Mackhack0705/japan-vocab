@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum VocabularyStatus {
+  NEW
+  LEARNING
+  FAMILIAR
+  MASTERED
+}
+
+enum ReviewResult {
+  CORRECT
+  WRONG
+  ALMOST
+}
+
+model Vocabulary {
+  id              String           @id @default(cuid())
+
+  japanese        String
+  reading         String
+  meaning         String
+
+  exampleJapanese String?
+  exampleEnglish  String?
+
+  status          VocabularyStatus @default(NEW)
+
+  correctCount    Int              @default(0)
+  wrongCount      Int              @default(0)
+  almostCount     Int              @default(0)
+
+  streak          Int              @default(0)
+
+  intervalDays    Int              @default(0)
+  nextReviewAt    DateTime         @default(now())
+  lastReviewedAt  DateTime?
+
+  jlptLevel       String?
+  tags            String[]         @default([])
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  reviews         Review[]
+
+  @@index([status])
+  @@index([nextReviewAt])
+}
+
+model Review {
+  id           String       @id @default(cuid())
+  vocabularyId String
+  vocabulary   Vocabulary   @relation(fields: [vocabularyId], references: [id], onDelete: Cascade)
+
+  result       ReviewResult
+  responseTime Int?
+  reviewedAt   DateTime     @default(now())
+
+  @@index([vocabularyId])
+  @@index([reviewedAt])
+}
