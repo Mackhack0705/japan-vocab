@@ -1,6 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+
+const router = useRouter();
 
 type Props = {
   onCreated: () => void;
@@ -57,6 +60,7 @@ export default function AddVocabularyForm({
       });
 
       onCreated();
+      router.refresh();
     } catch (error) {
       console.error(error);
       alert("Failed to add word");
