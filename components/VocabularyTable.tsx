@@ -5,6 +5,7 @@ type Vocabulary = {
   japanese: string;
   reading: string;
   meaning: string;
+  explanation: string | null;
   status: string;
   correctCount: number;
   wrongCount: number;
@@ -74,7 +75,12 @@ export default function VocabularyTable({
                   </td>
 
                   <td className="px-5 py-4">
-                    {word.meaning}
+                    <div>{word.meaning}</div>
+                    {word.explanation && (
+                      <p className="mt-1 text-sm text-slate-500">
+                        {word.explanation}
+                      </p>
+                    )}
                   </td>
 
                   <td className="px-5 py-4">

@@ -3,8 +3,6 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const router = useRouter();
-
 type Props = {
   onCreated: () => void;
 };
@@ -12,6 +10,7 @@ type Props = {
 export default function AddVocabularyForm({
   onCreated
 }: Props) {
+  const router = useRouter();
   const [loading, setLoading] =
     useState(false);
 
@@ -19,6 +18,7 @@ export default function AddVocabularyForm({
     japanese: "",
     reading: "",
     meaning: "",
+    explanation: "",
     exampleJapanese: "",
     exampleEnglish: "",
     jlptLevel: "N5"
@@ -56,7 +56,8 @@ export default function AddVocabularyForm({
         meaning: "",
         exampleJapanese: "",
         exampleEnglish: "",
-        jlptLevel: "N5"
+        jlptLevel: "N5",
+        explanation: ""
       });
 
       onCreated();
@@ -162,6 +163,15 @@ export default function AddVocabularyForm({
           )
         }
         placeholder="Example meaning — I eat rice."
+        className="w-full rounded-xl border px-4 py-3"
+      />
+
+
+      <textarea
+        id="explanation"
+        name="explanation"
+        placeholder="Explain how and when this word is used..."
+        rows={3}
         className="w-full rounded-xl border px-4 py-3"
       />
 

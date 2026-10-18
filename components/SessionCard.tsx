@@ -7,6 +7,7 @@ type Vocabulary = {
   japanese: string;
   reading: string;
   meaning: string;
+  explanation: string | null;
   exampleJapanese: string | null;
   exampleEnglish: string | null;
 };
@@ -152,25 +153,19 @@ export default function SessionCard({
   }
 
   function checkAnswer() {
-    const normalizedAnswer =
-      answer
-        .trim()
-        .toLowerCase();
+    const normalizedAnswer = answer.trim().toLowerCase();
 
-    const normalizedMeaning =
-      current.meaning
-        .trim()
-        .toLowerCase();
+    const acceptedMeanings = current.meaning
+      .split(/[;,/]/)
+      .map((meaning) => meaning.trim().toLowerCase())
+      .filter(Boolean);
 
-    if (
-      normalizedAnswer ===
-      normalizedMeaning
-    ) {
+    if (acceptedMeanings.includes(normalizedAnswer)) {
       submitResult("CORRECT");
     } else {
       submitResult("WRONG");
     }
-  }
+}
 
   return (
     <div className="mx-auto max-w-2xl py-8">
@@ -250,6 +245,14 @@ export default function SessionCard({
 
               <div className="text-lg font-semibold">
                 {current.meaning}
+                <div>
+                  {current.explanation && (
+                    <div className="mt-3 rounded-xl bg-blue-50 p-4 text-sm text-blue-900">
+                      <p className="mb-1 font-semibold">Explanation</p>
+                      <p>{current.explanation}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -26,6 +26,7 @@ model Vocabulary {
   japanese        String
   reading         String
   meaning         String
+  explanation     String?
 
   exampleJapanese String?
   exampleEnglish  String?

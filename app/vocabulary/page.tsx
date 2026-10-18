@@ -9,6 +9,7 @@ type Vocabulary = {
   japanese: string;
   reading: string;
   meaning: string;
+  explanation: string | null;
   status: string;
   correctCount: number;
   wrongCount: number;
