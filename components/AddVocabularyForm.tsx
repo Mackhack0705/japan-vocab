@@ -1,3 +1,4 @@
+
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -11,8 +12,7 @@ export default function AddVocabularyForm({
   onCreated
 }: Props) {
   const router = useRouter();
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     japanese: "",
@@ -28,25 +28,21 @@ export default function AddVocabularyForm({
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "/api/vocabulary",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-          body: JSON.stringify(form)
-        }
-      );
+      const response = await fetch("/api/vocabulary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form)
+      });
 
       if (!response.ok) {
+        const result = await response.json();
         throw new Error(
-          "Failed to create vocabulary"
+          result.error || "Failed to create vocabulary"
         );
       }
 
@@ -54,17 +50,22 @@ export default function AddVocabularyForm({
         japanese: "",
         reading: "",
         meaning: "",
+        explanation: "",
         exampleJapanese: "",
         exampleEnglish: "",
-        jlptLevel: "N5",
-        explanation: ""
+        jlptLevel: "N5"
       });
 
       onCreated();
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("Failed to add word");
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to add word"
+      );
     } finally {
       setLoading(false);
     }
@@ -91,8 +92,7 @@ export default function AddVocabularyForm({
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Add vocabulary you encounter while
-          studying.
+          Add vocabulary you encounter while studying.
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export default function AddVocabularyForm({
             update("japanese", e.target.value)
           }
           placeholder="Japanese — 食べる"
-          className="rounded-xl border px-4 py-3 outline-none focus:border-blue-500"
+          className="rounded-xl border px-4 py-3"
         />
 
         <input
@@ -114,7 +114,7 @@ export default function AddVocabularyForm({
             update("reading", e.target.value)
           }
           placeholder="Reading — たべる"
-          className="rounded-xl border px-4 py-3 outline-none focus:border-blue-500"
+          className="rounded-xl border px-4 py-3"
         />
 
         <input
@@ -124,7 +124,7 @@ export default function AddVocabularyForm({
             update("meaning", e.target.value)
           }
           placeholder="English — to eat"
-          className="rounded-xl border px-4 py-3 outline-none focus:border-blue-500"
+          className="rounded-xl border px-4 py-3"
         />
 
         <select
@@ -145,10 +145,7 @@ export default function AddVocabularyForm({
       <input
         value={form.exampleJapanese}
         onChange={(e) =>
-          update(
-            "exampleJapanese",
-            e.target.value
-          )
+          update("exampleJapanese", e.target.value)
         }
         placeholder="Example — ごはんを食べる。"
         className="w-full rounded-xl border px-4 py-3"
@@ -157,19 +154,17 @@ export default function AddVocabularyForm({
       <input
         value={form.exampleEnglish}
         onChange={(e) =>
-          update(
-            "exampleEnglish",
-            e.target.value
-          )
+          update("exampleEnglish", e.target.value)
         }
         placeholder="Example meaning — I eat rice."
         className="w-full rounded-xl border px-4 py-3"
       />
 
-
       <textarea
-        id="explanation"
-        name="explanation"
+        value={form.explanation}
+        onChange={(e) =>
+          update("explanation", e.target.value)
+        }
         placeholder="Explain how and when this word is used..."
         rows={3}
         className="w-full rounded-xl border px-4 py-3"

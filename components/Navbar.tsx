@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
 
 const links = [
   {
@@ -51,6 +52,7 @@ export default function Navbar() {
             );
           })}
         </div>
+        <LogoutButton />
       </div>
     </nav>
   );
