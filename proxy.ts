@@ -8,12 +8,12 @@ import {
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // MCP has its own Bearer-token authentication.
+  // MCP validates its own OAuth bearer tokens.
   if (pathname === "/api/mcp") {
     return NextResponse.next();
   }
 
-  // Public login and authentication endpoints.
+  // Public website authentication routes.
   if (
     pathname === "/login" ||
     pathname === "/api/auth/login" ||
@@ -22,26 +22,47 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const isMutation = ["POST", "PUT", "PATCH", "DELETE"]
-    .includes(request.method);
+  // OAuth authorization GET handles its own session check
+  // so it can preserve the complete authorization query.
+  if (
+    pathname === "/api/oauth/authorize" &&
+    request.method === "GET"
+  ) {
+    return NextResponse.next();
+  }
 
-	if (
+  // OAuth protocol endpoints do not use the website password cookie.
+  if (
+    pathname === "/api/oauth/register" ||
+    pathname === "/api/oauth/token"
+  ) {
+    return NextResponse.next();
+  }
+
+  const isMutation = [
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE"
+  ].includes(request.method);
+
+  if (
     isMutation &&
     pathname.startsWith("/api/") &&
     request.headers.get("origin") !== request.nextUrl.origin
   ) {
     return NextResponse.json(
-        { error: "Invalid origin" },
-        { status: 403 }
+      { error: "Invalid origin" },
+      { status: 403 }
     );
   }
+
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
 
   if (verifySessionToken(token)) {
     return NextResponse.next();
   }
 
-  // API requests receive JSON instead of an HTML redirect.
   if (pathname.startsWith("/api/")) {
     return NextResponse.json(
       { error: "Unauthorized" },

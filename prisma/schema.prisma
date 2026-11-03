@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -66,4 +67,73 @@ model Review {
 
   @@index([vocabularyId])
   @@index([reviewedAt])
+}
+
+model OAuthClient {
+  clientId                String   @id
+  clientName              String
+  redirectUris            String[]
+  grantTypes              String[]
+  responseTypes           String[]
+  tokenEndpointAuthMethod String   @default("none")
+  createdAt               DateTime @default(now())
+
+  authorizationCodes OAuthAuthorizationCode[]
+  accessTokens       OAuthAccessToken[]
+  refreshTokens      OAuthRefreshToken[]
+}
+
+model OAuthAuthorizationCode {
+  id                  String   @id @default(cuid())
+  codeHash            String   @unique
+  clientId            String
+  redirectUri         String
+  codeChallenge       String
+  codeChallengeMethod String
+  resource            String
+  scopes              String[] @default([])
+  expiresAt           DateTime
+  consumedAt          DateTime?
+  createdAt           DateTime @default(now())
+
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([expiresAt])
+}
+
+model OAuthAccessToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  familyId  String
+  clientId  String
+  resource  String
+  scopes    String[] @default([])
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@index([clientId, expiresAt])
+  @@index([familyId])
+}
+
+model OAuthRefreshToken {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  familyId   String
+  clientId   String
+  resource   String
+  scopes     String[] @default([])
+  expiresAt  DateTime
+  consumedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  client OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([familyId])
+  @@index([expiresAt])
 }

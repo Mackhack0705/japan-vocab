@@ -3,13 +3,50 @@
 
 import { FormEvent, useState } from "react";
 
+function getSafeCallbackUrl(): string {
+  const callbackUrl = new URLSearchParams(
+    window.location.search
+  ).get("callbackUrl");
+
+  if (
+    !callbackUrl ||
+    !callbackUrl.startsWith("/") ||
+    callbackUrl.startsWith("//") ||
+    callbackUrl.includes("\\")
+  ) {
+    return "/";
+  }
+
+  try {
+    const callback = new URL(
+      callbackUrl,
+      window.location.origin
+    );
+
+    if (callback.origin !== window.location.origin) {
+      return "/";
+    }
+
+    return (
+      callback.pathname +
+      callback.search +
+      callback.hash
+    );
+  } catch {
+    return "/";
+  }
+}
+
 export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
     setLoading(true);
     setError("");
 
@@ -25,10 +62,12 @@ export default function LoginPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Login failed");
+        throw new Error(
+          result.error || "Login failed"
+        );
       }
 
-      window.location.assign("/");
+      window.location.assign(getSafeCallbackUrl());
     } catch (error) {
       setError(
         error instanceof Error
@@ -50,6 +89,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-slate-900">
             Nihonkotoba
           </h1>
+
           <p className="mt-2 text-sm text-slate-500">
             Sign in to your private vocabulary workspace.
           </p>
@@ -60,7 +100,9 @@ export default function LoginPage() {
           required
           autoComplete="current-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) =>
+            setPassword(event.target.value)
+          }
           placeholder="Enter your password"
           className="w-full rounded-xl border px-4 py-3"
         />
