@@ -243,6 +243,12 @@ function renderConsentPage(
     })
     .join("");
 
+  // The redirect URI has already been validated against the
+  // registered OAuth client's redirect URI list.
+  // Allow only its origin in form-action so Chrome can follow
+  // the authorization response redirect.
+  const redirectOrigin = new URL(params.redirectUri).origin;
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -314,7 +320,7 @@ function renderConsentPage(
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
       "Content-Security-Policy":
-        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+        `default-src 'none'; style-src 'unsafe-inline'; form-action 'self' ${redirectOrigin}; base-uri 'none'; frame-ancestors 'none'`,
     },
   });
 }
